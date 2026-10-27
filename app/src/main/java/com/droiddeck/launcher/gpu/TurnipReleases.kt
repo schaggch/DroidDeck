@@ -58,6 +58,23 @@ object TurnipReleases {
         },
     )
 
+    internal fun pinnedAssets(): List<Asset> {
+        val tag = "v26.3.0-20261012-r2"
+        val base = "https://github.com/The412Banner/Banners-Turnip/releases/download/$tag"
+        return listOf(
+            Asset(
+                "Banners-Turnip", tag, "Turnip-$tag.zip", "$base/Turnip-$tag.zip", 2_642_724,
+                false, "Adreno 643 compatibility", "bb1b2c51e6446cf428d70255d037be169ac68108c00af33aa1ba7ece711f8336",
+                DriverPairs.BANNER_A643,
+            ),
+            Asset(
+                "Banners-Turnip", tag, "Turnip-$tag-Linux.zip", "$base/Turnip-$tag-Linux.zip", 3_217_150,
+                true, "Adreno 643 compatibility", "0a7a109b62df0b6f724ea277d1391b53df7ea6d9131f55ac8d64278a3b6b761a",
+                DriverPairs.BANNER_A643,
+            ),
+        )
+    }
+
     fun autoPicks(context: Context): List<AutoPicks.Rule> =
         AutoPicks.parse(prefs(context).getString(KEY_PICKS, null)) ?: AutoPicks.BUILT_IN
 

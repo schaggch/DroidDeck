@@ -51,7 +51,18 @@ class DriverPairsTest {
         assertEquals(DriverPairs.BANNER_ONEUI, DriverPairs.recommendedKey(gpu(740, oneUi = true), emptyList()))
         assertEquals(DriverPairs.BANNER_710, DriverPairs.recommendedKey(gpu(720), emptyList()))
         assertEquals(DriverPairs.BANNER, DriverPairs.recommendedKey(gpu(650), emptyList()))
+        assertEquals(DriverPairs.BANNER_A643, DriverPairs.recommendedKey(gpu(643), emptyList()))
         assertNull(DriverPairs.recommendedKey(gpu(0, adreno = false), emptyList()))
+    }
+
+    @Test
+    fun adreno643AlwaysGetsThePinnedMatchedPair() {
+        val pair = DriverPairs.from(null).single()
+        assertEquals(DriverPairs.BANNER_A643, pair.key)
+        assertTrue(pair.complete)
+        assertEquals("v26.3.0-20261012-r2", pair.display?.tag)
+        assertEquals(pair.display?.tag, pair.linux?.tag)
+        assertEquals(DriverPairs.BANNER_A643, DriverPairs.recommendedKey(gpu(643), listOf(pair)))
     }
 
     @Test
@@ -88,7 +99,13 @@ class DriverPairsTest {
                 asset("Turnip-r4-Linux.zip", "r4", true, DriverPairs.BANNER)),
             emptyList(), emptyList(), 0L,
         ))
-        assertEquals(listOf(DriverPairs.ddTurnip("DD-Turnip-v0.2.0"), DriverPairs.ddTurnip("DD-Turnip-v0.1.0"), DriverPairs.BANNER), pairs.map { it.key })
+        assertEquals(
+            listOf(
+                DriverPairs.ddTurnip("DD-Turnip-v0.2.0"), DriverPairs.ddTurnip("DD-Turnip-v0.1.0"),
+                DriverPairs.BANNER_A643, DriverPairs.BANNER,
+            ),
+            pairs.map { it.key },
+        )
         val dd = pairs.first()
         assertTrue(dd.complete)
         assertEquals(listOf(newer), dd.assets)

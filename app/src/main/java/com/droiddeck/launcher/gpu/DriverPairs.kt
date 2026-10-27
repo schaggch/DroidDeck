@@ -4,6 +4,7 @@ import com.droiddeck.launcher.gpu.GpuInfo.Family
 
 object DriverPairs {
     const val BANNER = "banner"
+    const val BANNER_A643 = "banner-a643"
     const val BANNER_A8XX = "banner-a8xx"
     const val BANNER_710 = "banner-710-720-test"
     const val BANNER_ONEUI = "banner-8g2-oneui"
@@ -36,6 +37,7 @@ object DriverPairs {
     }
 
     private fun describeFixed(key: String): Pair<String, Set<Family>> = when (key) {
+        BANNER_A643 -> "Banners-Turnip · Adreno 643 compatibility" to setOf(Family.A6XX)
         BANNER -> "Banners-Turnip · Adreno 6xx/7xx" to setOf(Family.A6XX, Family.A7XX)
         BANNER_A8XX -> "Banners-Turnip · Adreno 8xx" to setOf(Family.A8XX)
         BANNER_710 -> "Banners-Turnip · Adreno 710/720/722 (test)" to setOf(Family.A7XX_LOW)
@@ -46,8 +48,8 @@ object DriverPairs {
     }
 
     fun from(check: TurnipReleases.Check?): List<DriverPair> {
-        val assets = check?.assets.orEmpty().filter { it.pair.isNotEmpty() }
-        val order = listOf(DD_TURNIP, BANNER, BANNER_A8XX, BANNER_ONEUI, BANNER_710, WN_BALANCED, WN_PERFORMANCE)
+        val assets = (TurnipReleases.pinnedAssets() + check?.assets.orEmpty()).filter { it.pair.isNotEmpty() }
+        val order = listOf(DD_TURNIP, BANNER_A643, BANNER, BANNER_A8XX, BANNER_ONEUI, BANNER_710, WN_BALANCED, WN_PERFORMANCE)
         return assets.map { it.pair }.distinct()
             .sortedBy { key -> order.indexOf(key.substringBefore(':')).let { i -> if (i < 0) order.size else i } }
             .map { key ->
@@ -67,8 +69,8 @@ object DriverPairs {
         sdk: Int = android.os.Build.VERSION.SDK_INT, blob: Int? = null,
     ): String? {
         if (gpu.family == Family.NOT_ADRENO) return null
-        val keys = AutoPicks.preferences(gpu, rules, sdk, blob)
-            .ifEmpty { AutoPicks.preferences(gpu, AutoPicks.BUILT_IN, sdk, blob) }
+        val keys = (if (gpu.model == 643) listOf(BANNER_A643) else AutoPicks.preferences(gpu, rules, sdk, blob)
+            .ifEmpty { AutoPicks.preferences(gpu, AutoPicks.BUILT_IN, sdk, blob) })
             .mapNotNull { if (it == AutoPicks.NEWEST_DD_TURNIP) newestDdTurnip(pairs) else it }
         return keys.firstOrNull { key -> pairs.any { it.key == key && it.complete && AutoDriverTrial.release(it) !in bad } }
             ?: keys.firstOrNull()
